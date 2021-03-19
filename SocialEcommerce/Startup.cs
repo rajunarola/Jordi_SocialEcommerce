@@ -2,9 +2,6 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using SocialEcommerce.Data;
 using SocialEcommerce.Data.Entities;
@@ -14,6 +11,15 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Linq;
+using AutoMapper;
+using SocialEcommerce.Data.Repository;
+using SocialEcommerce.Repository.Interfaces;
+using SocialEcommerce.Repository.Respositories;
+using SocialEcommerce.Repository.Mapper;
+using SocialEcommerce.WebAPI.Mapper;
+using SocialEcommerce.WebAPI;
+using SocialEcommerce.Data.Seeders;
+
 
 namespace SocialEcommerce
 {
@@ -31,6 +37,7 @@ namespace SocialEcommerce
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            
             //Configure CORS for angular2 UI
             services.AddCors(options =>
             {
@@ -50,20 +57,33 @@ namespace SocialEcommerce
                 });
             });
 
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddIdentity<ApplicationUser, Role>()
+                .AddRoles<Role>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDefaultTokenProviders();
+            services.AddScoped<RoleManager<Role>>();
 
-            services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddScoped<IUserClaimsPrincipalFactory<ApplicationUser>, ClaimsPrincipalFactory>();
+            //services.AddDbContext<ApplicationDbContext>(options =>
+            //    options.UseSqlServer(
+            //        Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddIdentityServer()
-                .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
+            //services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
+            //    .AddRoles<IdentityRole>()
+            //    .AddEntityFrameworkStores<ApplicationDbContext>();
+
+
+            //services.AddIdentityServer()
+            //    .AddApiAuthorization<ApplicationUser<long>, ApplicationDbContext>();
+            services.AddHealthChecks();
 
             services.AddAuthentication()
-                .AddIdentityServerJwt();
+               .AddIdentityServerJwt();
+
+            services.AddHttpContextAccessor();
             //services.AddControllersWithViews();
-            //services.AddRazorPages();
+            services.AddRazorPages();
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
@@ -73,10 +93,20 @@ namespace SocialEcommerce
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = $"Social Ecommerce - {DateTime.Today.Month}{DateTime.Today.Day}{DateTime.Today.Hour}", Version = "v1" });
             });
+            services.AddAutoMapper(typeof(Startup),typeof(AutoMapperProfile),typeof(RepositoryAutoMapperProfile));
+            services.AddAutoMapper(typeof(Startup), typeof(AutoMapperProfile), typeof(AutoMapperProfile));
+            services.AddControllersWithViews();
+            services.AddScoped<IStoredProcedureRepositoryBase, StoredProcedureRepositoryBase>();
+            services.AddScoped<ICategory, CategoryRepository>();
+            services.AddScoped<IProductService, ProductRepository>();
+            services.AddScoped<IUserService, UserRepository>();
+            services.AddScoped<ICartService, CartRepository>();
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, UserManager<ApplicationUser> userManager, RoleManager<Role> roleManager)
         {
             app.UseCors(
                  options => options.SetIsOriginAllowed(x => _ = true).AllowAnyMethod().AllowAnyHeader().AllowCredentials()
@@ -104,7 +134,7 @@ namespace SocialEcommerce
             app.UseRouting();
 
             app.UseAuthentication();
-            app.UseIdentityServer();
+            //app.UseIdentityServer();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
@@ -138,8 +168,31 @@ namespace SocialEcommerce
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Social Ecommerce API v1");
                 c.RoutePrefix = string.Empty;
-            });
+            }); 
+
+            SeedData.Seed(userManager, roleManager);
 
         }
+
+        //public class FileUploadOperationSwagger : IOperationFilter
+        //{
+        //    public void Apply(Operation operation, OperationFilterContext context)
+        //    {
+        //        if (operation.OperationId == "Post")
+        //        {
+        //            operation.Parameters = new List<IParameter>
+        //        {
+        //            new NonBodyParameter
+        //            {
+        //                Name = "myFile",
+        //                Required = true,
+        //                Type = "file",
+        //                In = "formData"
+        //            }
+        //        };
+        //        }
+        //    }
+        //}
     }
 }
+

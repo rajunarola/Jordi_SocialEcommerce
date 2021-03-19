@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocialEcommerce.Data", "..\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocialEcommerce.Repository", "..\SocialEcommerce.Repository\SocialEcommerce.Repository.csproj", "{FF8EFAA2-F0E2-4012-AA67-04E319BA5348}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SocialEcommerce.Shared", "..\SocialEcommerce.Shared\SocialEcommerce.Shared.csproj", "{E0CAACAD-E861-45FE-B71A-B3C1887B4417}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SocialEcommerce.Shared", "..\SocialEcommerce.Shared\SocialEcommerce.Shared.csproj", "{E0CAACAD-E861-45FE-B71A-B3C1887B4417}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
