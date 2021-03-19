@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SocialEcommerce.Data\SocialEcommerce.Data.csproj" />
+    <ProjectReference Include="..\SocialEcommerce.Shared\SocialEcommerce.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Interfaces\" />
+    <Folder Include="Respositories\" />
+  </ItemGroup>
+
+</Project>
